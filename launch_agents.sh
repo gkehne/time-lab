@@ -15,9 +15,11 @@ trap _term SIGINT
 
 TIME=$(date +%s)
 
-python agent.py 60 0 3 $1 $TIME &
-python agent.py 60 1 3 $(($1+1)) $TIME &
-python agent.py 60 2 3 $(($1+2)) $TIME &
+# $1 is the global seed
+# $2 is the randint_max value
+python agent.py 60 0 3 $1 $TIME $2 &
+python agent.py 60 1 3 $(($1+1)) $TIME $2 &
+python agent.py 60 2 3 $(($1+2)) $TIME $2 &
 
 for job in `jobs -p`
 do

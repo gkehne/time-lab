@@ -24,7 +24,7 @@ class LogEntry():
 """ """
 class Agent():
     """ """
-    def __init__(self, lifetime, machine_index, num_machines, seed, uuid):
+    def __init__(self, lifetime, machine_index, num_machines, seed, uuid, randint_max=10):
         random.seed(seed)
         self.lifetime = lifetime  # in seconds
         self.machine_index = machine_index
@@ -42,6 +42,7 @@ class Agent():
         self.create_log(num_machines)
 
         # begin conducting business
+        self.randint_max = randint_max
         self.main_loop()
 
     """ """
@@ -54,7 +55,7 @@ class Agent():
 
         with open(self.log_filename, mode='a') as log_file:
             writer = csv.DictWriter(log_file, fieldnames=LogEntry.ENTRY_ORDER)
-            writer.writerow(extra_info)
+            writer.writerow(dummy_info_dict)
             writer.writeheader()
 
     """ """
@@ -114,7 +115,7 @@ class Agent():
         # increment clock (according to Lamport this should happen before an event)
         self.update_clock()
 
-        task_ID = randint(1,10)
+        task_ID = randint(1, self.randint_max)
         if task_ID == 1:
             self.send_message(recipient=self.other_machines[0])
         elif task_ID == 2:
@@ -130,6 +131,7 @@ class Agent():
     def main_loop(self):
         # run for only the allotted time (lifetime)
         for _ in range(self.lifetime * self.ticks_per_second):
+            start_time = time()
             new_message, queue_len = self.communicator.get_message()
             if new_message is None:  # no incoming messages
                 self.do_random_task()
@@ -137,8 +139,10 @@ class Agent():
                 # Convert string message back into tuple of ints
                 new_message = list(map(int, new_message.split('@@@')))
                 self.handle_incoming_message(new_message, queue_len)
-
-            sleep(1/self.ticks_per_second)
+            
+            already_taken = time() - start_time
+            sleep_time = max(1/self.ticks_per_second - already_taken, 0)
+            sleep(sleep_time)
 
     """
     """
@@ -155,4 +159,5 @@ if __name__ == '__main__':
     num_machines = int(sys.argv[3])
     seed = int(sys.argv[4])
     uuid = int(sys.argv[5])
-    agent = Agent(lifetime, machine_index, num_machines, seed, uuid)
+    randint_max = int(sys.argv[6])
+    agent = Agent(lifetime, machine_index, num_machines, seed, uuid, randint_max)
