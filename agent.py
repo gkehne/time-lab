@@ -36,16 +36,22 @@ class Agent():
 
         # create log file and write its column headers
         self.log_filename = f'logs/log{int(time())}machine{machine_index}.csv'
-        self.create_log()
+        self.create_log(num_machines)
 
         # begin conducting business
         self.main_loop()
 
     """ """
-    def create_log(self):
+    def create_log(self, num_machines):
         os.makedirs('logs', exist_ok=True)
+
+        #  kluge to print out some extra info at the top of the log file
+        extra_info = [f'num machines: {num_machines}', f'ticks per second: {self.ticks_per_second}', f'lifetime: {self.lifetime}']
+        dummy_info_dict = {k:info for k, info in zip(LogEntry.ENTRY_ORDER, extra_info)}
+
         with open(self.log_filename, mode='a') as log_file:
             writer = csv.DictWriter(log_file, fieldnames=LogEntry.ENTRY_ORDER)
+            writer.writerow(extra_info)
             writer.writeheader()
 
     """ """
