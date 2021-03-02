@@ -1,8 +1,8 @@
-import multiprocessing as mp
+# import multiprocessing as mp
 from communicator import Communicator
 from time import time, sleep
 from random import randint
-from collections import deque
+# from collections import deque
 import csv
 
 """
@@ -19,13 +19,13 @@ class LogEntry():
         self.queue_len = queue_len
 
 
-""" """
-def listen_for_messages(incoming_message_queue, communicator):
-    while True:
-        msg = communicator.get_message()
-        if msg is not None:
-            incoming_message_queue.appendleft(msg)
-
+# """ """
+# def listen_for_messages(incoming_message_queue, communicator):
+#     while True:
+#         msg = communicator.get_message()
+#         if msg is not None:
+#             incoming_message_queue.appendleft(msg)
+#
 
 """ """
 class Agent():
@@ -37,7 +37,7 @@ class Agent():
         self.logical_clock = 0
         self.lifetime = 60  # in seconds
         self.ticks_per_second = randint(1, 6)
-        self.incoming_message_queue = deque()
+        # self.incoming_message_queue = deque()
 
         self.communicator = Communicator(self.machine_index, num_machines)
 
@@ -48,9 +48,9 @@ class Agent():
         # prompt communicator to connect to other agents
         self.communicator.make_connections()
         # start a separate process on which it listens for incoming messages
-        self.communicatorprocess = mp.Process(target=listen_for_messages, args=[self.incoming_message_queue, self.communicator])
-        self.communicatorprocess.daemon = True
-        self.communicatorprocess.start()
+        # self.communicatorprocess = mp.Process(target=listen_for_messages, args=[self.incoming_message_queue, self.communicator])
+        # self.communicatorprocess.daemon = True
+        # self.communicatorprocess.start()
 
         # begin conducting business
         self.main_loop()
@@ -127,11 +127,10 @@ class Agent():
     def main_loop(self):
         # run for only the allotted time (lifetime)
         for _ in range(self.lifetime * self.ticks_per_second):
-            queue_len = len(self.incoming_message_queue)
-            if queue_len == 0:  # no incoming messages
+            new_message, queue_len = self.communicator.get_message()
+            if new_message is None:  # no incoming messages
                 self.do_random_task()
             else:
-                new_message = self.incoming_message_queue.pop()
                 self.handle_incoming_message(new_message, queue_len)
 
             self.update_clock()
