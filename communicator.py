@@ -4,8 +4,10 @@ import multiprocessing as mp
 from queue_with_size import Queue
 import sys
 
+def getqname(idx, uuid):
+    return '%d_%d' % (idx, uuid)
 
-def listen_for_messages(q, machine_index):
+def listen_for_messages(q, machine_index, uuid):
     def callback(ch, method, properties, body):
         q.put(body)
         ch.basic_ack(delivery_tag = method.delivery_tag)
@@ -13,22 +15,27 @@ def listen_for_messages(q, machine_index):
     # Setup connection to listen to
     connection = pika.BlockingConnection(pika.ConnectionParameters('localhost'))
     channel = connection.channel()
-    channel.queue_declare(queue=str(machine_index))
-    channel.basic_consume(queue=str(machine_index), on_message_callback=callback)
+    channel.queue_declare(queue=getqname(machine_index, uuid))
+    channel.basic_consume(queue=getqname(machine_index, uuid), on_message_callback=callback)
 
     # Start listening
     channel.start_consuming()
 
 class Communicator():
-    def __init__(self, machine_index, num_machines):
+    def __init__(self, machine_index, num_machines, uuid):
+        # uuid is a random int that uniquely identifies the set of queue.
+        # this is needed so that the processes are using fresh queues each
+        # time the program restarts
+        
         self.machine_index = machine_index
         self.num_machines = num_machines
+        self.uuid = uuid
 
         # Setup message queue
         self.message_queue = Queue()
 
         # Setup message listener process
-        self.message_listener = mp.Process(target=listen_for_messages, args=(self.message_queue, self.machine_index))
+        self.message_listener = mp.Process(target=listen_for_messages, args=(self.message_queue, self.machine_index, self.uuid))
         self.message_listener.daemon = True
         self.message_listener.start()
 
@@ -38,8 +45,8 @@ class Communicator():
         # We're going to setup a connection, send, and kill the connection when sending each message
         connection = pika.BlockingConnection(pika.ConnectionParameters('localhost'))
         channel = connection.channel()
-        channel.queue_declare(queue=str(recipient))
-        channel.basic_publish(exchange='', routing_key=str(recipient), body=msg.encode())
+        channel.queue_declare(queue=getqname(recipient, self.uuid))
+        channel.basic_publish(exchange='', routing_key=getqname(recipient, self.uuid), body=msg.encode())
         connection.close()
 
     def get_message(self):
