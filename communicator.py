@@ -8,7 +8,6 @@ import sys
 def listen_for_messages(q, machine_index):
     def callback(ch, method, properties, body):
         q.put(body)
-        print(body)
         ch.basic_ack(delivery_tag = method.delivery_tag)
     
     # Setup connection to listen to
@@ -33,22 +32,6 @@ class Communicator():
         self.message_listener.daemon = True
         self.message_listener.start()
 
-    def make_connections(self):
-        """
-        # check for connectivity to all machines before returning
-
-        for i in range(self.num_machines):
-            # Don't need to check for communication to ourselves...
-            if i == self.machine_index:
-                continue
-
-            self.send_message(i, '@@@from%d@@@' % self.machine_index)
-
-        for i in range(self.num_machines):
-        """
-        pass
-            
-
     def send_message(self, recipient, msg):
         # recipient is the machine ID as an int
 
@@ -66,7 +49,7 @@ class Communicator():
         if self.message_queue.empty():
             return None, queue_len
         
-        return self.message_queue.get(), queue_len-1
+        return self.message_queue.get(), queue_len
 
 
 if __name__ == '__main__':
