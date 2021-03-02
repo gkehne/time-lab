@@ -2,7 +2,6 @@
 from communicator import Communicator
 from time import time, sleep
 from random import randint
-# from collections import deque
 import csv
 import sys
 
@@ -20,23 +19,15 @@ class LogEntry():
         self.queue_len = queue_len
 
 
-# """ """
-# def listen_for_messages(incoming_message_queue, communicator):
-#     while True:
-#         msg = communicator.get_message()
-#         if msg is not None:
-#             incoming_message_queue.appendleft(msg)
-#
-
 """ """
 class Agent():
     """ """
     def __init__(self, lifetime, machine_index, num_machines):
+        self.lifetime = lifetime  # in seconds
         self.machine_index = machine_index
         # find indices for other agents, assuming they lie in a contiguous block starting at "port"
-        self.other_machines = [idx for idx in range(port, port + num_machines) if not idx == self.machine_index]
+        self.other_machines = [idx for idx in range(num_machines) if not idx == self.machine_index]
         self.logical_clock = 0
-        self.lifetime = 60  # in seconds
         self.ticks_per_second = randint(1, 6)
         # self.incoming_message_queue = deque()
 
@@ -45,13 +36,6 @@ class Agent():
         # create log file and write its column headers
         self.log_filename = f'log{time()}machine{machine_index}.csv'
         self.create_log()
-
-        # prompt communicator to connect to other agents
-        self.communicator.make_connections()
-        # start a separate process on which it listens for incoming messages
-        # self.communicatorprocess = mp.Process(target=listen_for_messages, args=[self.incoming_message_queue, self.communicator])
-        # self.communicatorprocess.daemon = True
-        # self.communicatorprocess.start()
 
         # begin conducting business
         self.main_loop()
