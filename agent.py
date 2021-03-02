@@ -3,19 +3,20 @@ from communicator import Communicator
 from time import time, sleep
 from random import randint
 import csv
+import os
 import sys
 
 """
     just a small class to store logging information
 """
 class LogEntry():
-    ENTRY_ORDER = ['sys_time', 'logical_time', 'action', 'to', 'from', 'queue_len']
-    def __init__(sys_time, logical_time, action, to=None, from=None, queue_len=None):
+    ENTRY_ORDER = ['sys_time', 'logical_time', 'action', 'to', 'fromname', 'queue_len']
+    def __init__(self, sys_time, logical_time, action, to=None, fromname=None, queue_len=None):
         self.sys_time = sys_time
-        self.logical_time
+        self.logical_time = logical_time
         self.action = action
         self.to = to
-        self.from=from
+        self.fromname = fromname
         self.queue_len = queue_len
 
 
@@ -34,7 +35,7 @@ class Agent():
         self.communicator = Communicator(self.machine_index, num_machines)
 
         # create log file and write its column headers
-        self.log_filename = f'log{time()}machine{machine_index}.csv'
+        self.log_filename = f'logs/log{int(time())}machine{machine_index}.csv'
         self.create_log()
 
         # begin conducting business
@@ -42,13 +43,14 @@ class Agent():
 
     """ """
     def create_log(self):
+        os.makedirs('logs', exist_ok=True)
         with open(self.log_filename, mode='a') as log_file:
             writer = csv.DictWriter(log_file, fieldnames=LogEntry.ENTRY_ORDER)
             writer.writeheader()
 
     """ """
     def update_clock(self, newtime=None):
-        if newtime = None:
+        if newtime is None:
             self.logical_clock += 1
         else:
             if newtime < self.logical_clock:
@@ -60,7 +62,7 @@ class Agent():
         sender, other_machine_logical_time = new_message
         # fast-forward clock if other machine's time is ahead
         if other_machine_logical_time > self.logical_clock:
-            self.update_clock(new_time=other_machine_logical_time)
+            self.update_clock(newtime=other_machine_logical_time)
 
         # increment time by 1, regardless of whether other machine's clock is ahead
         self.update_clock()
@@ -70,7 +72,7 @@ class Agent():
             sys_time=time(),
             logical_time=self.logical_clock,
             action="receive",
-            from=sender,
+            fromname=sender,
             queue_len=queue_len
         ))
 
@@ -78,7 +80,8 @@ class Agent():
     def send_message(self, recipient):
         # call communicator to send message
         msg = (self.machine_index, self.logical_clock)  # (sender, local logical time)
-        self.communicator.send_message(recipient, msg)
+        # Need to convert tuple of ints to string
+        self.communicator.send_message(recipient, '@@@'.join(map(str, msg)))
 
         # log activity
         self.log_activity(LogEntry(
@@ -122,6 +125,8 @@ class Agent():
             if new_message is None:  # no incoming messages
                 self.do_random_task()
             else:
+                # Convert string message back into tuple of ints
+                new_message = list(map(int, new_message.split('@@@')))
                 self.handle_incoming_message(new_message, queue_len)
 
             sleep(1/self.ticks_per_second)
