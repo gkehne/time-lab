@@ -62,7 +62,7 @@ class Agent():
             writer.writeheader()
 
     """ """
-    def _update_clock(self, newtime=None):
+    def update_clock(self, newtime=None):
         if newtime = None:
             self.logical_clock += 1
         else:
@@ -73,9 +73,12 @@ class Agent():
     """ """
     def handle_incoming_message(self, new_message, queue_len):
         sender, other_machine_logical_time = new_message
-        # update clock if other machine's time is ahead
+        # fast-forward clock if other machine's time is ahead
         if other_machine_logical_time > self.logical_clock:
-            self._update_clock(new_time=other_machine_logical_time)
+            self.update_clock(new_time=other_machine_logical_time)
+
+        # increment time by 1, regardless of whether other machine's clock is ahead
+        self.update_clock()
 
         # log activity
         self.log_activity(LogEntry(
@@ -111,6 +114,9 @@ class Agent():
 
     """ """
     def do_random_task(self):
+        # increment clock (according to Lamport this should happen before an event)
+        self.update_clock()
+
         task_ID = randint(1,10)
         if task_ID == 1:
             self.send_message(recipient=self.other_machines[0])
@@ -132,8 +138,6 @@ class Agent():
                 self.do_random_task()
             else:
                 self.handle_incoming_message(new_message, queue_len)
-
-            self.update_clock()
 
             sleep(1/self.ticks_per_second)
 
