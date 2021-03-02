@@ -1,6 +1,7 @@
 # import multiprocessing as mp
 from communicator import Communicator
 from time import time, sleep
+import random
 from random import randint
 import csv
 import os
@@ -23,7 +24,8 @@ class LogEntry():
 """ """
 class Agent():
     """ """
-    def __init__(self, lifetime, machine_index, num_machines):
+    def __init__(self, lifetime, machine_index, num_machines, seed, uuid):
+        random.seed(seed)
         self.lifetime = lifetime  # in seconds
         self.machine_index = machine_index
         # find indices for other agents, assuming they lie in a contiguous block starting at "port"
@@ -31,8 +33,9 @@ class Agent():
         self.logical_clock = 0
         self.ticks_per_second = randint(1, 6)
         # self.incoming_message_queue = deque()
+        print('Starting machine %d with %d ticks per second, seed %d' % (machine_index, self.ticks_per_second, seed))
 
-        self.communicator = Communicator(self.machine_index, num_machines)
+        self.communicator = Communicator(self.machine_index, num_machines, uuid)
 
         # create log file and write its column headers
         self.log_filename = f'logs/log{int(time())}machine{machine_index}.csv'
@@ -150,4 +153,6 @@ if __name__ == '__main__':
     lifetime = int(sys.argv[1])
     machine_index = int(sys.argv[2])
     num_machines = int(sys.argv[3])
-    agent = Agent(lifetime, machine_index, num_machines)
+    seed = int(sys.argv[4])
+    uuid = int(sys.argv[5])
+    agent = Agent(lifetime, machine_index, num_machines, seed, uuid)

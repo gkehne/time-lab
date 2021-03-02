@@ -5,7 +5,7 @@ _term() {
 
     for job in `jobs -p`
     do
-        kill -TERM $job 2>/dev/null
+        kill $job 2>/dev/null
     done
   exit 0
 }
@@ -13,9 +13,11 @@ _term() {
 trap _term SIGTERM
 trap _term SIGINT
 
-python agent.py 60 0 3 &
-python agent.py 60 1 3 &
-python agent.py 60 2 3 &
+TIME=$(date +%s)
+
+python agent.py 60 0 3 $1 $TIME &
+python agent.py 60 1 3 $(($1+1)) $TIME &
+python agent.py 60 2 3 $(($1+2)) $TIME &
 
 for job in `jobs -p`
 do
