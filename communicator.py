@@ -1,12 +1,14 @@
 # rabbitMQ
 import pika
 import multiprocessing as mp
+from queue_with_size import Queue
 import sys
 
 
 def listen_for_messages(q, machine_index):
     def callback(ch, method, properties, body):
         q.put(body)
+        print(body)
         ch.basic_ack(delivery_tag = method.delivery_tag)
     
     # Setup connection to listen to
@@ -24,7 +26,7 @@ class Communicator():
         self.num_machines = num_machines
 
         # Setup message queue
-        self.message_queue = mp.Queue()
+        self.message_queue = Queue()
 
         # Setup message listener process
         self.message_listener = mp.Process(target=listen_for_messages, args=(self.message_queue, self.machine_index))
@@ -60,10 +62,11 @@ class Communicator():
         connection.close()
 
     def get_message(self):
+        queue_len = self.message_queue.qsize()
         if self.message_queue.empty():
-            return None
+            return None, queue_len
         
-        return self.message_queue.get()
+        return self.message_queue.get(), queue_len-1
 
 
 if __name__ == '__main__':
@@ -74,7 +77,7 @@ if __name__ == '__main__':
     comm = Communicator(machine_index, num_machines)
 
     if send:
-        comm.send_message(machine_index+1 % num_machines, 'test message')
+        comm.send_message((machine_index+1) % num_machines, 'test message')
 
     while True:
         pass
