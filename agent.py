@@ -4,6 +4,7 @@ from time import time, sleep
 from random import randint
 # from collections import deque
 import csv
+import sys
 
 """
     just a small class to store logging information
@@ -30,7 +31,7 @@ class LogEntry():
 """ """
 class Agent():
     """ """
-    def __init__(self, port, lifetime, machine_index, num_machines):
+    def __init__(self, lifetime, machine_index, num_machines):
         self.machine_index = machine_index
         # find indices for other agents, assuming they lie in a contiguous block starting at "port"
         self.other_machines = [idx for idx in range(port, port + num_machines) if not idx == self.machine_index]
@@ -149,3 +150,9 @@ class Agent():
             writer = csv.DictWriter(log_file, fieldnames=LogEntry.ENTRY_ORDER)
             # add a row to the log: the attributes of log_entry, in fieldnames order
             writer.writerow(log_entry.__dict__)
+
+if __name__ == '__main__':
+    lifetime = int(sys.argv[1])
+    machine_index = int(sys.argv[2])
+    num_machines = int(sys.argv[3])
+    agent = Agent(lifetime, machine_index, num_machines)

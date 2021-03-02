@@ -1,5 +1,5 @@
 #!/bin/bash
 
-python agent.py 0 &
-python agent.py 1 &
-python agent.py 2 &
+python agent.py 60 0 3 &
+python agent.py 60 1 3 &
+python agent.py 60 2 3 &
