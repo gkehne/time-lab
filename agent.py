@@ -1,8 +1,8 @@
-import multiprocessing as mp
+# import multiprocessing as mp
 from communicator import Communicator
 from time import time, sleep
 from random import randint
-from collections import deque
+# from collections import deque
 import csv
 
 """
@@ -19,13 +19,13 @@ class LogEntry():
         self.queue_len = queue_len
 
 
-""" """
-def listen_for_messages(incoming_message_queue, communicator):
-    while True:
-        msg = communicator.get_message()
-        if msg is not None:
-            incoming_message_queue.appendleft(msg)
-
+# """ """
+# def listen_for_messages(incoming_message_queue, communicator):
+#     while True:
+#         msg = communicator.get_message()
+#         if msg is not None:
+#             incoming_message_queue.appendleft(msg)
+#
 
 """ """
 class Agent():
@@ -37,7 +37,7 @@ class Agent():
         self.logical_clock = 0
         self.lifetime = 60  # in seconds
         self.ticks_per_second = randint(1, 6)
-        self.incoming_message_queue = deque()
+        # self.incoming_message_queue = deque()
 
         self.communicator = Communicator(self.machine_index, num_machines)
 
@@ -48,9 +48,9 @@ class Agent():
         # prompt communicator to connect to other agents
         self.communicator.make_connections()
         # start a separate process on which it listens for incoming messages
-        self.communicatorprocess = mp.Process(target=listen_for_messages, args=[self.incoming_message_queue, self.communicator])
-        self.communicatorprocess.daemon = True
-        self.communicatorprocess.start()
+        # self.communicatorprocess = mp.Process(target=listen_for_messages, args=[self.incoming_message_queue, self.communicator])
+        # self.communicatorprocess.daemon = True
+        # self.communicatorprocess.start()
 
         # begin conducting business
         self.main_loop()
@@ -62,7 +62,7 @@ class Agent():
             writer.writeheader()
 
     """ """
-    def _update_clock(self, newtime=None):
+    def update_clock(self, newtime=None):
         if newtime = None:
             self.logical_clock += 1
         else:
@@ -73,9 +73,12 @@ class Agent():
     """ """
     def handle_incoming_message(self, new_message, queue_len):
         sender, other_machine_logical_time = new_message
-        # update clock if other machine's time is ahead
+        # fast-forward clock if other machine's time is ahead
         if other_machine_logical_time > self.logical_clock:
-            self._update_clock(new_time=other_machine_logical_time)
+            self.update_clock(new_time=other_machine_logical_time)
+
+        # increment time by 1, regardless of whether other machine's clock is ahead
+        self.update_clock()
 
         # log activity
         self.log_activity(LogEntry(
@@ -111,6 +114,9 @@ class Agent():
 
     """ """
     def do_random_task(self):
+        # increment clock (according to Lamport this should happen before an event)
+        self.update_clock()
+
         task_ID = randint(1,10)
         if task_ID == 1:
             self.send_message(recipient=self.other_machines[0])
@@ -127,14 +133,11 @@ class Agent():
     def main_loop(self):
         # run for only the allotted time (lifetime)
         for _ in range(self.lifetime * self.ticks_per_second):
-            queue_len = len(self.incoming_message_queue)
-            if queue_len == 0:  # no incoming messages
+            new_message, queue_len = self.communicator.get_message()
+            if new_message is None:  # no incoming messages
                 self.do_random_task()
             else:
-                new_message = self.incoming_message_queue.pop()
                 self.handle_incoming_message(new_message, queue_len)
-
-            self.update_clock()
 
             sleep(1/self.ticks_per_second)
 
