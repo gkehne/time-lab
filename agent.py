@@ -163,6 +163,9 @@ class Agent():
         # increment clock (according to Lamport this should happen before an event)
         self.update_clock()
 
+        # sends to just one of the other machines u.a.r. with probability
+        # 1/randint_max, sends to all with probability 1/randint_max, and does
+        # an internal activity otherwise
         task_ID = random.randint(1, self.randint_max)
         if task_ID in range(1, self.num_machines):
             self.send_message(recipient=self.other_machines[task_ID-1])
@@ -224,7 +227,7 @@ if __name__ == '__main__':
     seed = int(sys.argv[4])
     uuid = int(sys.argv[5])
     randint_max = int(sys.argv[6])
-    
+
     # Optional argument for setting the frequency
     if len(sys.argv) == 8:
         tps = int(sys.argv[7])
