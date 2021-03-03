@@ -34,7 +34,7 @@ class Agent():
         # self.incoming_message_queue = deque()
         print('Starting machine %d with %d ticks per second, seed %d' % (machine_index, self.ticks_per_second, seed))
 
-        self.communicator = Communicator(self.machine_index, num_machines, uuid)
+        self.communicator = Communicator(self.machine_index, uuid)
 
         # create log file and write its column headers
         self.log_filename = f'logs/log{int(time())}machine{machine_index}.csv'
