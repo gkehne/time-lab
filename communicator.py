@@ -53,7 +53,7 @@ class Communicator():
         connection.close()
 
     def get_message(self):
-        # pops a message off the queue if one exists, else returns None
+        # pops a python string message off the queue if one exists, else returns None
         # second return value is always the length of the queue BEFORE popping any message off
 
         queue_len = self.message_queue.qsize()
