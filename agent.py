@@ -23,14 +23,14 @@ class LogEntry():
 """ """
 class Agent():
     """ """
-    def __init__(self, lifetime, machine_index, num_machines, seed, uuid, randint_max=10):
+    def __init__(self, lifetime, machine_index, num_machines, seed, uuid, randint_max=10, ticks_per_second=None):
         random.seed(seed)
         self.lifetime = lifetime  # in seconds
         self.machine_index = machine_index
         # find indices for other agents, assuming they lie in a contiguous block starting at "port"
         self.other_machines = [idx for idx in range(num_machines) if not idx == self.machine_index]
         self.logical_clock = 0
-        self.ticks_per_second = random.randint(1, 6)
+        self.ticks_per_second = random.randint(1, 6) if ticks_per_second is None else ticks_per_second
         # self.incoming_message_queue = deque()
         print('Starting machine %d with %d ticks per second, seed %d' % (machine_index, self.ticks_per_second, seed))
 
@@ -159,4 +159,11 @@ if __name__ == '__main__':
     seed = int(sys.argv[4])
     uuid = int(sys.argv[5])
     randint_max = int(sys.argv[6])
-    agent = Agent(lifetime, machine_index, num_machines, seed, uuid, randint_max)
+    
+    # Optional argument for setting the frequency
+    if len(sys.argv) == 8:
+        tps = int(sys.argv[7])
+    else:
+        tps = None
+
+    agent = Agent(lifetime, machine_index, num_machines, seed, uuid, randint_max, tps)
