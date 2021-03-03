@@ -34,10 +34,10 @@ Once `conda` is installed, it can be used to create an environment by running
  ```
 (to exit simply type `conda deactivate`).
 
-We will also need the `pika` package. With the conda environment active, run
+We will also need the `pika` and `pytest` packages. With the conda environment active, run
 
 ```
-pip install pika
+pip install pika pytest
 ```
 
 ## Running the program
@@ -49,8 +49,13 @@ pip install pika
 
 `<randint_max>` should be the integer upper bound (inclusive) for the random action taken by each agent. Specifically, when an agent's queue is empty it selects an integer from 1 to `<randint_max>`. If the integer is in \[1, 3\], it performs some type of send command. If the integer is in \[4, `<randint_max>`\], it sends nothing. In any case, the agent always updates its clock and logs.
 
-Start a rabbitmq server
-call launch_agents.sh with these parameters and what they mean
+### Tests
+
+Running tests also requires the RabbitMQ broker server to be running. To run the tests, simply call
+
+```
+pytest
+```
 
 ## Design decisions
 
