@@ -17,6 +17,7 @@ TIME=$(date +%s)
 
 # $1 is the global seed
 # $2 is the randint_max value
+# agent.py args are lifetime, machine_index, num_machines
 python agent.py 60 0 3 $1 $TIME $2 &
 python agent.py 60 1 3 $(($1+1)) $TIME $2 &
 python agent.py 60 2 3 $(($1+2)) $TIME $2 &

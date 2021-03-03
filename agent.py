@@ -2,7 +2,6 @@
 from communicator import Communicator
 from time import time, sleep
 import random
-from random import randint
 import csv
 import os
 import sys
@@ -31,7 +30,7 @@ class Agent():
         # find indices for other agents, assuming they lie in a contiguous block starting at "port"
         self.other_machines = [idx for idx in range(num_machines) if not idx == self.machine_index]
         self.logical_clock = 0
-        self.ticks_per_second = randint(1, 6)
+        self.ticks_per_second = random.randint(1, 6)
         # self.incoming_message_queue = deque()
         print('Starting machine %d with %d ticks per second, seed %d' % (machine_index, self.ticks_per_second, seed))
 
@@ -115,7 +114,7 @@ class Agent():
         # increment clock (according to Lamport this should happen before an event)
         self.update_clock()
 
-        task_ID = randint(1, self.randint_max)
+        task_ID = random.randint(1, self.randint_max)
         if task_ID == 1:
             self.send_message(recipient=self.other_machines[0])
         elif task_ID == 2:
@@ -139,7 +138,7 @@ class Agent():
                 # Convert string message back into tuple of ints
                 new_message = list(map(int, new_message.split('@@@')))
                 self.handle_incoming_message(new_message, queue_len)
-            
+
             already_taken = time() - start_time
             sleep_time = max(1/self.ticks_per_second - already_taken, 0)
             sleep(sleep_time)
