@@ -40,6 +40,7 @@ class Agent():
         random.seed(seed)
         self.lifetime = lifetime  # runtime for the program, in seconds
         self.machine_index = machine_index
+        self.num_machines = num_machines
         # find indices for other agents, assuming they lie in a contiguous block starting at "port"
         self.other_machines = [idx for idx in range(num_machines) if not idx == self.machine_index]
         self.logical_clock = 0
@@ -163,13 +164,11 @@ class Agent():
         self.update_clock()
 
         task_ID = random.randint(1, self.randint_max)
-        if task_ID == 1:
-            self.send_message(recipient=self.other_machines[0])
-        elif task_ID == 2:
-            self.send_message(recipient=self.other_machines[1])
-        elif task_ID == 3:
-            self.send_message(recipient=self.other_machines[0])
-            self.send_message(recipient=self.other_machines[1])
+        if task_ID in range(1, self.num_machines):
+            self.send_message(recipient=self.other_machines[task_ID-1])
+        elif task_ID == self.num_machines:
+            for i in range(self.num_machines-1):
+                self.send_message(recipient=self.other_machines[i])
         else:
             self.internal_event()
 
