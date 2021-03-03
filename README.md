@@ -46,6 +46,7 @@ pip install pika
 2. Run `./launch_agents.sh <global seed> <randint_max>`
 
 `<global seed>` should be an integer which sets the global seed, in turn setting the seeds of each of the agents. This can be any integer; use the same integer to get reproducible results.
+
 `<randint_max>` should be the integer upper bound (inclusive) for the random action taken by each agent. Specifically, when an agent's queue is empty it selects an integer from 1 to `<randint_max>`. If the integer is in \[1, 3\], it performs some type of send command. If the integer is in \[4, `<randint_max>`\], it sends nothing. In any case, the agent always updates its clock and logs.
 
 Start a rabbitmq server
