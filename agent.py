@@ -36,7 +36,7 @@ class LogEntry():
 """
 class Agent():
     """ """
-    def __init__(self, lifetime, machine_index, num_machines, seed, uuid, randint_max=10, ticks_per_second=None):
+    def __init__(self, lifetime, machine_index, num_machines, seed, uuid, randint_max=10, ticks_per_second=None, fake_test_communicator=None):
         random.seed(seed)
         self.lifetime = lifetime  # runtime for the program, in seconds
         self.machine_index = machine_index
@@ -45,10 +45,13 @@ class Agent():
         self.other_machines = [idx for idx in range(num_machines) if not idx == self.machine_index]
         self.logical_clock = 0
         self.ticks_per_second = random.randint(1, 6) if ticks_per_second is None else ticks_per_second
-        # self.incoming_message_queue = deque()
         print('Starting machine %d with %d ticks per second, seed %d' % (machine_index, self.ticks_per_second, seed))
 
-        self.communicator = Communicator(self.machine_index, uuid)
+        # this allows for testing Agent without instantiating a Communicator
+        if fake_test_communicator is None:
+            self.communicator = Communicator(self.machine_index, uuid)
+        else:
+            self.communicator = fake_test_communicator
 
         # create log file and write its column headers
         self.log_filename = f'logs/log{int(time())}machine{machine_index}.csv'
