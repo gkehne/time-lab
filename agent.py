@@ -66,6 +66,7 @@ class Agent():
             The action logs will be appended as rows one-by-one to the end.
         """
 
+        # generates a folder for logs if one does not exist
         os.makedirs('logs', exist_ok=True)
 
         #  record extra info at the top of the log file
@@ -229,9 +230,10 @@ if __name__ == '__main__':
     randint_max = int(sys.argv[6])
 
     # Optional argument for setting the frequency
+    ticks_per_second = None
     if len(sys.argv) == 8:
-        tps = int(sys.argv[7])
-    else:
-        tps = None
+        ticks_per_second = int(sys.argv[7])
 
-    agent = Agent(lifetime, machine_index, num_machines, seed, uuid, randint_max, tps)
+    agent = Agent(
+        lifetime, machine_index, num_machines, seed, uuid, randint_max, ticks_per_second
+    )

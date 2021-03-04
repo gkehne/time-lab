@@ -18,8 +18,9 @@ LIFETIME=180
 
 # $1 is the global seed
 # $2 is the randint_max value
-# agent.py args are lifetime, machine_index, num_machines
-python agent.py $LIFETIME 0 12 $1 $TIME $2 3 &
+
+# args: lifetime, machine_index, num_machines, seed, sys_time, randint_max, ticks_per_second
+python agent.py $LIFETIME 0 12 $1 $TIME $2 4 &
 python agent.py $LIFETIME 1 12 $(($1+1)) $TIME $2 4 &
 python agent.py $LIFETIME 2 12 $(($1+2)) $TIME $2 4 &
 python agent.py $LIFETIME 3 12 $(($1+3)) $TIME $2 4 &
